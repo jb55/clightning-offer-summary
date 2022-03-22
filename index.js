@@ -2,10 +2,30 @@
 const Plugin = require('clightningjs');
 const plugin = new Plugin();
 
+function invoice_matches(invoice, offerid, matcher)
+{
+	if (offerid && invoice.local_offer_id === offerid) {
+		return true
+	}
+
+	if (matcher) {
+		return matcher.test(invoice.description)
+	}
+
+	return false
+}
+
 async function summarize_offer(params) {
 	const offerid = params.offerid || params[0]
 	const limit = params.limit || params[1]
-	if (!offerid)
+	const description = params.description || params[2]
+	let matcher = null
+
+	if (description) {
+		matcher = new RegExp(description)
+	}
+
+	if (!offerid && !description)
 		return missing_param("offerid")
 
 	const {invoices} = await plugin.rpc.call('listinvoices')
@@ -15,7 +35,7 @@ async function summarize_offer(params) {
 	let top_donors = []
 
 	for (const invoice of invoices) {
-		if (invoice.local_offer_id === offerid && invoice.status === 'paid') {
+		if (invoice.status === 'paid' && invoice_matches(invoice, offerid, matcher)) {
 			total_msatoshi += invoice.msatoshi || 0
 
 			const whitelisted = whitelisted_invoice(invoice)
@@ -36,8 +56,8 @@ async function summarize_offer(params) {
 	return {total_msatoshi, paid_invoices, top_donors}
 }
 
-function whitelisted_invoice({payer_note, paid_at, msatoshi}) {
-	return {payer_note, paid_at, msatoshi}
+function whitelisted_invoice({payer_note, paid_at, msatoshi, description}) {
+	return {payer_note, paid_at, msatoshi, description}
 }
 
 function process_top_donors(top_donors, invoice, limit)
@@ -61,6 +81,6 @@ function missing_param(name) {
 }
 
 // (name, callback, usage, description, longDescription)
-plugin.addMethod('offer-summary', summarize_offer, 'offerid', 'Summarize offers, listing totals and payer notes');
+plugin.addMethod('offer-summary', summarize_offer, '<offerid> [limit] [description (regex that matches description)]', 'Summarize offers, listing totals and payer notes');
 plugin.start();
 
