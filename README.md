@@ -1,7 +1,7 @@
 
 # offer-summary-plugin
 
-A clightning plugin that summarizes paid offer invoices
+A clightning plugin that summarizes paid invoices matching a query (`offerid` or `description` regex)
 
 ## Usage
 
