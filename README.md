@@ -3,9 +3,15 @@
 
 A clightning plugin that summarizes paid offer invoices
 
-## Example
+## Usage
 
-    $ lightning-cli offer-summary 22db2cbdb2d6e1f4d727d099e2ea987c05212d6b4af56d92497e093b82360db7 5
+    $ lightning-cli <offerid> [limit] [description (regex that matches description)]
+
+## Examples
+
+    $ lightning-cli -k offer-summary offerid=22db2cbdb2d6e1f4d727d099e2ea987c05212d6b4af56d92497e093b82360db7 limit=5 description="@tipjar|@moneys"
+
+    $ lightning-cli -k offer-summary limit=5 description="@tipjar|@moneys"
 
 ```
 {
