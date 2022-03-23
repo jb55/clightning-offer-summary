@@ -36,7 +36,7 @@ async function summarize_offer(params) {
 
 	for (const invoice of invoices) {
 		if (invoice.status === 'paid' && invoice_matches(invoice, offerid, matcher)) {
-			total_msatoshi += invoice.msatoshi || 0
+			total_msatoshi += invoice.msatoshi_received || 0
 
 			const whitelisted = whitelisted_invoice(invoice)
 			process_top_donors(top_donors, whitelisted, limit)
@@ -56,8 +56,9 @@ async function summarize_offer(params) {
 	return {total_msatoshi, paid_invoices, top_donors}
 }
 
-function whitelisted_invoice({payer_note, paid_at, msatoshi, description}) {
-	return {payer_note, paid_at, msatoshi, description}
+function whitelisted_invoice({payer_note, paid_at, msatoshi_received, description}) {
+
+	return {payer_note, paid_at, msatoshi: msatoshi_received, description}
 }
 
 function process_top_donors(top_donors, invoice, limit)
